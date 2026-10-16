@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        STUDENT_NAME = 'Adilet'
+        STUDENT_SURNAME = 'Toktarbay'
+        STUDENT_GROUP = 'IT2-2306'
+        STUDENT_ID = '37629'
+
+        IMAGE_NAME = 'toktarbay-adilet-devops'
+        CONTAINER_NAME = 'toktarbay-adilet-container'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'python3 -m compileall -q app'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'python3 -m unittest discover -s tests -v'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker build -t $IMAGE_NAME .'
+            }
+        }
+
+        stage('Docker Run') {
+            steps {
+                sh '''
+                    docker rm -f "$CONTAINER_NAME" || true
+
+                    docker run -d \
+                      --name "$CONTAINER_NAME" \
+                      -e STUDENT_NAME="$STUDENT_NAME" \
+                      -e STUDENT_SURNAME="$STUDENT_SURNAME" \
+                      -e STUDENT_GROUP="$STUDENT_GROUP" \
+                      -e STUDENT_ID="$STUDENT_ID" \
+                      "$IMAGE_NAME"
+
+                    docker logs "$CONTAINER_NAME"
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Finished: SUCCESS'
+        }
+
+        failure {
+            echo 'Pipeline failed'
+        }
+    }
+}
