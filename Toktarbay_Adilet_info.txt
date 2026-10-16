@@ -1,0 +1,5 @@
+Name: Adilet
+Surname: Toktarbay
+Group: IT2-2306
+Student ID: 37629
+Course: DevOps
